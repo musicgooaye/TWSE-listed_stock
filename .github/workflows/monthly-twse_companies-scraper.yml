@@ -1,0 +1,33 @@
+name: Monthly TWSE Companies Scraper
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'  # 每月 1 日凌晨 0 點
+  workflow_dispatch:     # 手動觸發
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 pandas lxml
+
+      - name: Download TWSE companies
+        run: python scripts/download_companies.py
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/
+          git commit -m "Update TWSE companies list - $(date +%Y-%m-%d)" || echo "No changes to commit"
+          git push
