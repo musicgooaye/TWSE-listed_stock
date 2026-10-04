@@ -1,0 +1,84 @@
+name: Monthly TWSE Companies Scraper
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'  # 每月 1 日凌晨 0 點
+  workflow_dispatch:     # 手動觸發
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 pandas lxml
+
+      - name: Debug - Check working directory
+        run: |
+          echo "Current working directory:"
+          pwd
+          echo ""
+          echo "Directory structure:"
+          ls -la
+          echo ""
+          echo "Scripts directory:"
+          ls -la scripts/
+
+      - name: Download TWSE companies
+        run: |
+          echo "Starting scraper..."
+          python scripts/download_companies.py
+          echo ""
+          echo "Scraper finished, checking data directory..."
+
+      - name: Debug - Check generated files
+        run: |
+          echo "Checking data directory:"
+          if [ -d "data" ]; then
+            ls -lh data/
+            echo "✓ data 目錄存在"
+          else
+            echo "✗ data 目錄不存在！"
+            exit 1
+          fi
+          echo ""
+          echo "Checking for CSV files:"
+          if ls data/twse_companies_*.csv 1> /dev/null 2>&1; then
+            echo "✓ 找到 CSV 檔案"
+            wc -l data/twse_companies_*.csv
+          else
+            echo "✗ 沒有找到 CSV 檔案"
+            exit 1
+          fi
+
+      - name: Commit and push changes
+        if: success()
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          echo "Adding data directory..."
+          git add data/
+          echo "Current git status:"
+          git status
+          echo ""
+          echo "Committing..."
+          git commit -m "Update TWSE companies list - $(date +%Y-%m-%d)"
+          echo "Pushing..."
+          git push
+
+      - name: Debug - Final check
+        if: always()
+        run: |
+          echo "Final directory check:"
+          ls -la
+          if [ -d "data" ]; then
+            ls -lh data/
+          fi
