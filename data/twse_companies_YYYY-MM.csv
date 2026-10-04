@@ -1,0 +1,62 @@
+
+### 欄位說明
+| 欄位 | 說明 | 範例 |
+|------|------|------|
+| code | 股票代號 | 2330 |
+| name | 公司名稱 | 台積電 |
+| market | 上市地點 | 上市 / 上櫃 / 興櫃 |
+| type | 商品類型 | 股票、ETF 等 |
+| listing_date | 上市日期 | 1994-06-30 |
+
+### 範例
+```csv
+code,name,market,type,listing_date
+2330,台積電,上市,股票,1994-06-30
+2317,鴻海,上市,股票,2001-07-19
+0050,元大台灣50,上市,ETF,2003-07-30
+```
+
+## 使用方式
+
+### Python 讀取
+```python
+import pandas as pd
+
+df = pd.read_csv('data/twse_companies_2026-10.csv')
+print(df.head())
+```
+
+### 查詢特定公司
+```python
+tsmc = df[df['code'] == '2330']
+```
+
+## GitHub Actions
+
+工作流程檔案：`.github/workflows/monthly-twse_companies-scraper.yml`
+
+### 手動執行
+1. 進入 repo 的 **Actions** 分頁
+2. 左邊選擇 **Monthly TWSE Companies Scraper**
+3. 點 **Run workflow**
+
+## 相關工具
+
+- **爬蟲**：BeautifulSoup + requests
+- **資料處理**：pandas
+- **排程**：GitHub Actions
+
+## 常見問題
+
+### Q: CSV 檔案名稱為什麼包含年月？
+A: 便於保留歷史紀錄，追蹤公司清單的變化。
+
+### Q: 如果爬蟲失敗怎麼辦？
+A: 檢查 GitHub Actions 的執行日誌（Actions 分頁 → 失敗的工作流 → 詳細記錄）。
+
+### Q: 可以改成其他頻率嗎？
+A: 修改 `.github/workflows/monthly-twse_companies-scraper.yml` 的 cron 表達式。
+
+## 許可證
+
+Open source - 供學習和投資研究使用
